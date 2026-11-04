@@ -174,6 +174,14 @@ export default function EmailsQueuePage() {
         </button>
       </div>
 
+      <div className="p-3 rounded-control bg-secondary/10 border border-secondary/30 text-xs text-secondary flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-18">bolt</span>
+          <span className="font-semibold">Auto-Send Mode Active:</span>
+          <span className="text-on-surface/90">Emails dispatch automatically upon discovery via official Gmail API. Manual approval option has been removed per your preference.</span>
+        </div>
+      </div>
+
       {activeTab === 'queue' ? (
         <section className="space-y-4">
           {loading ? (

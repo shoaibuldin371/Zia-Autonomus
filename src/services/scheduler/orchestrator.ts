@@ -4,6 +4,7 @@ import { verifyBusinessWebsite } from '../discovery/website-verifier';
 import { calculateOpportunity } from '../discovery/scoring';
 import { findDuplicateBusiness } from '../discovery/dedupe';
 import { generatePitchWithGemini } from '../pitch/gemini-client';
+import { sendGmailMessage } from '../email/gmail-sender';
 
 export interface DiscoveryRunParams {
   city: string;
@@ -187,14 +188,57 @@ export async function executeDiscoveryRun(
         channel: 'email',
       });
 
-      await store.saveDraft({
+      const sendMode = process.env.DEFAULT_SEND_MODE || 'auto';
+      const isAutoSend = sendMode === 'auto';
+      const recipientEmail = 'inquiry@' + (rawWebsite ? new URL(rawWebsite).hostname.replace(/^www\./, '') : 'localbusiness.com');
+      const pitchSubject = pitch.subject || `Website for ${name}`;
+
+      const draft = await store.saveDraft({
         business_id: savedBiz.id,
-        recipient_email: 'inquiry@' + (rawWebsite ? new URL(rawWebsite).hostname.replace(/^www\./, '') : 'localbusiness.com'),
-        subject: pitch.subject || `Website for ${name}`,
+        recipient_email: recipientEmail,
+        subject: pitchSubject,
         body_text: pitch.body,
-        status: 'pending_approval',
-        requires_approval: true,
+        status: isAutoSend ? 'queued' : 'pending_approval',
+        requires_approval: !isAutoSend,
       });
+
+      if (isAutoSend) {
+        try {
+          const sendResult = await sendGmailMessage({
+            to: recipientEmail,
+            subject: pitchSubject,
+            bodyText: pitch.body,
+            idempotencyKey: `auto_send_${draft.id}_${Date.now()}`,
+          });
+
+          await store.updateDraftStatus(draft.id, 'sent');
+          await store.saveSendLog({
+            id: `send_${Date.now()}`,
+            business_id: savedBiz.id,
+            draft_id: draft.id,
+            recipient_email: recipientEmail,
+            sender_email: 'ziauldin371@gmail.com',
+            subject: pitchSubject,
+            gmail_message_id: sendResult.gmailMessageId,
+            thread_id: sendResult.threadId,
+            labels: sendResult.labels,
+            idempotency_key: `send_${draft.id}`,
+            status: 'delivered',
+            sent_at: sendResult.sentAt,
+          });
+
+          await store.recordTouch({
+            business_id: savedBiz.id,
+            channel: 'email',
+            operator_email: 'ziauldin371@gmail.com',
+            action: 'auto_sent_email',
+            touched_at: sendResult.sentAt,
+          });
+        } catch (sendErr) {
+          // If Gmail API is not yet authorized or token expired, remains queued for auto-dispatch
+          console.warn(`[Auto-Send] Queued for automatic dispatch:`, sendErr);
+        }
+      }
 
       draftsCreated++;
     }
