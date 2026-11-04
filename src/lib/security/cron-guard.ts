@@ -63,3 +63,4 @@ export function validateCronRequest(req: NextRequest): CronValidationResult {
 
   return { authorized: true };
 }
+

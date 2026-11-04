@@ -68,3 +68,4 @@ describe('Cron Guard (Fail-Closed Vercel Cron Security)', () => {
     expect(res.response?.status).toBe(401);
   });
 });
+

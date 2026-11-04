@@ -118,3 +118,4 @@ export function calculateOpportunity(businessId: string, ctx: ScoreContext): Cal
     issueBadge,
   };
 }
+

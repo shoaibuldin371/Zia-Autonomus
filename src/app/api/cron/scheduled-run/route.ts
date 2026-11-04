@@ -76,3 +76,4 @@ async function handleCron(req: NextRequest) {
     await store.releaseLock('scheduled_cron_run');
   }
 }
+

@@ -143,7 +143,7 @@ export default function SafetyAndRulesPage() {
             <div>
               <h1 className="text-xl font-bold text-on-surface">Guardian Safety Shield</h1>
               <p className="text-xs text-subtext mt-0.5">
-                Operator: <span className="text-on-surface font-mono">ziauldin371@gmail.com</span> (Karachi, PKT UTC+5)
+                Operator: <span className="text-on-surface font-mono">ziauldin371@gmail.com</span> (USA)
               </p>
             </div>
           </div>
@@ -300,3 +300,4 @@ export default function SafetyAndRulesPage() {
     </div>
   );
 }
+

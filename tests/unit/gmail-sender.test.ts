@@ -24,6 +24,7 @@ describe('Gmail Sender & MIME Builder', () => {
     expect(decoded).toContain('Reply-To: ziauldin371@gmail.com');
     expect(decoded).toContain('List-Unsubscribe: <https://growth.zia.dev/api/compliance/unsubscribe?token=abc>');
     expect(decoded).toContain('List-Unsubscribe-Post: List-Unsubscribe=One-Click');
-    expect(decoded).toContain('Physical address: Zia Ul Din, Karachi, Pakistan.');
+    expect(decoded).toContain('Physical address: Zia Ul Din, USA.');
   });
 });
+

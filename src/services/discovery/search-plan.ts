@@ -77,3 +77,4 @@ export function generateDefaultSearchPlan(): SearchPlanEntry[] {
   }
   return plan;
 }
+

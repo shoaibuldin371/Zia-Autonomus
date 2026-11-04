@@ -42,3 +42,4 @@ describe('SSRF Guard & Network Isolation', () => {
     await expect(safeFetch('http://192.168.1.1')).rejects.toThrow('SSRF Guard');
   });
 });
+

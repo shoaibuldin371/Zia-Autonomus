@@ -9,3 +9,4 @@ export async function GET() {
     platforms: PLATFORMS_SEED,
   });
 }
+

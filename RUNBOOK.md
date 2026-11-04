@@ -28,3 +28,4 @@ If Google revokes OAuth tokens or invalidates refresh credentials:
 - Daily email limit can be adjusted from 5 to 50 (stepper on `/safety`). Default is 25.
 - Spacing delay between sends can be toggled between 4, 6, and 10 minutes.
 - Auto-send remains disabled until explicitly toggled after a live test email is verified.
+

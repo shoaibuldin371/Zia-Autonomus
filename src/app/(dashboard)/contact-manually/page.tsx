@@ -15,7 +15,7 @@ export default function ContactManuallyPage() {
   }
 
   const scriptText = `1. "Hi, is this the owner or manager at [Business Name]?"
-2. "My name is Zia Ul Din — I'm an automation and website developer based in Karachi."
+2. "My name is Zia Ul Din — I'm an automation and website developer based in the USA."
 3. "I noticed your Google profile has [Rating] stars from [Review Count] customers, but no direct website link for mobile visitors."
 4. "I build fast, high-converting Next.js booking systems for local businesses for $500, delivered in 3 days."
 5. "Could I send a 2-minute video preview to your WhatsApp so you can see how it looks?"`;
@@ -192,3 +192,4 @@ export default function ContactManuallyPage() {
     </div>
   );
 }
+

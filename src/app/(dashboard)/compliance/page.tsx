@@ -99,7 +99,7 @@ export default function CompliancePage() {
           <div className="p-4 rounded-control bg-surface-container border border-outline-variant/20 space-y-1.5">
             <h3 className="font-bold text-on-surface">3. Physical Address</h3>
             <p>
-              Valid operator address included on every email: Zia Ul Din, Karachi, Pakistan.
+              Valid operator address included on every email: Zia Ul Din, USA.
             </p>
           </div>
         </div>
@@ -107,3 +107,4 @@ export default function CompliancePage() {
     </div>
   );
 }
+

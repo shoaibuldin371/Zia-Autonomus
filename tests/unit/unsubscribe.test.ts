@@ -37,3 +37,4 @@ describe('Unsubscribe Security (HMAC-SHA256)', () => {
     expect(url).toContain('token=');
   });
 });
+

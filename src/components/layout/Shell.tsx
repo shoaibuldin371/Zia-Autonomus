@@ -49,7 +49,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Growth System
             </span>
           </Link>
-          <span className="text-xs text-subtext hidden md:inline">• Pakistan PKT (UTC+5)</span>
+          <span className="text-xs text-subtext hidden md:inline">• USA</span>
         </div>
 
         {/* Global Controls & Actions */}
@@ -252,7 +252,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="text-xs text-on-surface/90 space-y-3 leading-relaxed">
               <p>
-                <strong>Operator:</strong> Zia Ul Din (Karachi, PKT UTC+5).
+                <strong>Operator:</strong> Zia Ul Din (USA).
               </p>
               <p>
                 <strong>Safety First:</strong> Review first mode is enabled by default. Every outbound email is drafted for your approval. Auto-send remains locked until you test and confirm a real email to your own Gmail address.
@@ -276,3 +276,4 @@ export function Shell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+

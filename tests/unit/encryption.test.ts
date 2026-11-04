@@ -39,3 +39,4 @@ describe('Encryption (AES-256-GCM)', () => {
     expect(() => encrypt('test')).toThrow('ENCRYPTION_SECRET is required');
   });
 });
+

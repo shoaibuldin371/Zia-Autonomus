@@ -60,3 +60,4 @@ describe('Auto-Send 10-Point Guard & Recipient Timezone Window', () => {
     expect(evalResult.reasons.some((r) => r.includes('Emergency Stop'))).toBe(true);
   });
 });
+

@@ -52,7 +52,7 @@ export default function PlatformsEnginePage() {
             </div>
             <div className="flex items-center gap-1.5 text-secondary">
               <span className="material-symbols-outlined text-16">check_circle</span>
-              <span>Pakistan Payouts: Wise & Payoneer</span>
+              <span>US & Global Payouts: Direct ACH, Wise & Stripe</span>
             </div>
             <div className="flex items-center gap-1.5 text-secondary">
               <span className="material-symbols-outlined text-16">check_circle</span>
@@ -171,3 +171,4 @@ export default function PlatformsEnginePage() {
     </div>
   );
 }
+

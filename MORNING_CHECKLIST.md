@@ -30,3 +30,4 @@ Follow this 5-minute checklist daily at 09:15 PKT following the morning automate
 - [ ] Navigate to **Hot Client Requests** (`/requests`).
 - [ ] Paste any new project postings from Upwork or remote client boards.
 - [ ] Review the classified proposal and copy to clipboard for on-platform submission.
+

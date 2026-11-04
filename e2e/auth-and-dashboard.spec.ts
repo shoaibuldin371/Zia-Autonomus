@@ -32,3 +32,4 @@ test.describe('Growth System Console End-to-End', () => {
     await expect(page.getByRole('heading', { name: 'Terms of Use' })).toBeVisible();
   });
 });
+

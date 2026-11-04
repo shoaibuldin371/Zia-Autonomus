@@ -168,3 +168,4 @@ export async function getValidGmailAccessToken(): Promise<string> {
 
   return refreshed.access_token;
 }
+

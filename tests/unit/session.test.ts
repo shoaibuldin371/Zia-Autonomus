@@ -45,3 +45,4 @@ describe('Session Security (HS256 JWT)', () => {
     await expect(createSessionToken('ziauldin371@gmail.com')).rejects.toThrow();
   });
 });
+

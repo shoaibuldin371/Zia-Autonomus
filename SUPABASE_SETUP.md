@@ -22,3 +22,4 @@ Ensure the `supabase_realtime` publication includes:
 - `job_steps`
 - `send_log`
 - `replies`
+

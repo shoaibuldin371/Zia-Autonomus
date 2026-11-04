@@ -45,3 +45,4 @@ export async function GET() {
     status: healthData.status === 'healthy' ? 200 : 503,
   });
 }
+

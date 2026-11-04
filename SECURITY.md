@@ -22,3 +22,4 @@ Third-party URLs inspected during website verification are validated against:
 
 ## 4. Cryptographic Storage
 Sensitive third-party OAuth access and refresh tokens are encrypted using `AES-256-GCM` with an authenticated 128-bit authentication tag before being stored in PostgreSQL.
+

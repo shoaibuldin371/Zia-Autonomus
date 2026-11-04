@@ -78,3 +78,4 @@ Full-Stack AI Developer & Automation Architect`;
     expect(aiResult.fitScore).toBeGreaterThanOrEqual(70);
   });
 });
+

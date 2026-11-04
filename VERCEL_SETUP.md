@@ -52,3 +52,4 @@ Configure the following environment variables in Vercel (**Settings > Environmen
 ```
 - **Hobby Plan Notice:** On Vercel's Hobby plan, scheduled cron jobs may fire anywhere within the scheduled hour (up to 59 minutes late). Upgrading to Pro provides exact-minute dispatch.
 - **Vercel Cron Header:** Vercel automatically sends `Authorization: Bearer <CRON_SECRET>` when `CRON_SECRET` is set in the environment.
+

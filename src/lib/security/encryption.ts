@@ -54,3 +54,4 @@ export function decrypt(encryptedPayload: string): string {
 
   return decrypted;
 }
+

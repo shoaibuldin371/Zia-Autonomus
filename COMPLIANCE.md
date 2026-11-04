@@ -12,3 +12,4 @@
 
 ## 3. 72-Hour Cross-Channel Protection
 To prevent aggressive or repetitive outreach, the system checks `touch_log` before queuing any communication. Once a business is contacted via email, phone, or social DM, a mandatory 72-hour gap is enforced across all channels.
+

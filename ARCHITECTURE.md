@@ -51,3 +51,4 @@
 - **Constant-Time Verification:** Auth checks and cron bearer token checks utilize `crypto.timingSafeEqual`.
 - **SSRF Network Isolation:** Outbound HTTP fetches to unknown targets execute through `safeFetch()`, preventing requests to private, loopback, or cloud metadata IP ranges.
 - **AES-256-GCM Token Encryption:** Stored Gmail OAuth tokens are encrypted at rest using `ENCRYPTION_SECRET`.
+

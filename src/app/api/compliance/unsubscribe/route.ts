@@ -55,3 +55,4 @@ export async function POST(req: NextRequest) {
     message: `${email} has been unsubscribed and suppressed.`,
   });
 }
+

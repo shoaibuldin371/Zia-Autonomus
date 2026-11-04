@@ -123,3 +123,4 @@ export async function searchGooglePlacesNew(params: {
 
   throw new Error('Google Places API request failed unexpectedly.');
 }
+

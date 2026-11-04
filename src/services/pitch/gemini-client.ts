@@ -67,7 +67,7 @@ export async function generatePitchWithGemini(params: PitchGenerationParams): Pr
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const systemInstruction = `
-You are Zia Ul Din, an expert full-stack AI developer and automation architect from Pakistan writing a concise, respectful, evidence-only business outreach message.
+You are Zia Ul Din, an expert full-stack AI developer and automation architect based in the USA writing a concise, respectful, evidence-only business outreach message.
 Strict Rules:
 1. Ground every claim ONLY on the provided verified evidence. Never invent revenue loss, customer numbers, expansion, or hiring.
 2. Structure: (a) One verified factual observation, (b) why it matters, (c) concrete offer ($${params.offerPriceUsd}, ${params.offerTimelineDays} days), (d) soft low-friction question.
@@ -140,3 +140,4 @@ Body:
     clearTimeout(timer);
   }
 }
+

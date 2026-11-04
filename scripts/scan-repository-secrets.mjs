@@ -39,3 +39,4 @@ function scanDir(dir) {
 
 const flags = scanDir('.');
 console.log('Secret Scan Results:', flags.length === 0 ? 'CLEAN! Zero secrets in tracked code.' : flags);
+

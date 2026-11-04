@@ -42,3 +42,4 @@ export function buildUnsubscribeUrl(baseUrl: string, email: string): string {
   const encodedEmail = encodeURIComponent(email.trim().toLowerCase());
   return `${baseUrl.replace(/\/$/, '')}/api/compliance/unsubscribe?email=${encodedEmail}&token=${token}`;
 }
+

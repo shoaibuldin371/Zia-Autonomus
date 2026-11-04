@@ -30,3 +30,4 @@
 
 ## 4. Verification Check
 - Only `ziauldin371@gmail.com` is permitted to connect. Connecting any other account will be rejected immediately by the callback handler.
+

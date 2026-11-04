@@ -49,10 +49,11 @@ export function buildMimeMessage(params: {
   lines.push(params.bodyText);
 
   if (params.unsubscribeUrl) {
+    const address = process.env.PHYSICAL_MAILING_ADDRESS || 'Zia Ul Din, USA';
     lines.push('');
     lines.push('---');
     lines.push(`Unsubscribe: ${params.unsubscribeUrl}`);
-    lines.push('Physical address: Zia Ul Din, Karachi, Pakistan.');
+    lines.push(`Physical address: ${address}.`);
   }
 
   const rawMime = lines.join('\r\n');
@@ -134,3 +135,4 @@ export async function sendTestEmailToMyself(): Promise<SendEmailResult> {
     idempotencyKey: `test_send_${Date.now()}`,
   });
 }
+

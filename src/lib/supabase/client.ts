@@ -47,3 +47,4 @@ export function getSupabaseBrowserClient(): SupabaseClient {
 
   return browserClientInstance;
 }
+
