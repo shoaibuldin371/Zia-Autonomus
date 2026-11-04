@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Autonomous Growth Console - Dark Theme (Default) */
+  --canvas: #051424;
+  --surface: #051424;
+  --surface-dim: #051424;
+  --surface-bright: #2c3a4c;
+  --surface-container-lowest: #010f1f;
+  --surface-container-low: #0d1c2d;
+  --surface-container: #122131;
+  --surface-container-high: #1c2b3c;
+  --surface-container-highest: #273647;
+  --on-surface: #d4e4fa;
+  --on-surface-variant: #c7c4d7;
+  --outline: #908fa1;
+  --outline-variant: #464555;
+  --primary: #c1c1ff;
+  --on-primary: #1500a8;
+  --primary-container: #5b5bf0;
+  --on-primary-container: #f6f2ff;
+  --secondary: #4ae176;
+  --on-secondary: #003915;
+  --secondary-container: #00b954;
+  --on-secondary-container: #004119;
+  --tertiary: #ffb95f;
+  --on-tertiary: #472a00;
+  --tertiary-container: #9c6300;
+  --on-tertiary-container: #fff2e7;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  --card-bg: #121a2f;
+  --elevated-bg: #18223d;
+  --divider-color: #1e293b;
+}
+
+.light {
+  /* Light Theme tokens derived from same palette */
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-dim: #f1f5f9;
+  --surface-bright: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f8fafc;
+  --surface-container: #f1f5f9;
+  --surface-container-high: #e2e8f0;
+  --surface-container-highest: #cbd5e1;
+  --on-surface: #0f172a;
+  --on-surface-variant: #475569;
+  --outline: #94a3b8;
+  --outline-variant: #cbd5e1;
+  --primary: #5b5bf0;
+  --on-primary: #ffffff;
+  --primary-container: #e0e0fc;
+  --on-primary-container: #1500a8;
+  --secondary: #16a34a;
+  --on-secondary: #ffffff;
+  --secondary-container: #dcfce7;
+  --on-secondary-container: #004119;
+  --tertiary: #d97706;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #fef3c7;
+  --on-tertiary-container: #472a00;
+  --error: #dc2626;
+  --on-error: #ffffff;
+  --error-container: #fee2e2;
+  --on-error-container: #991b1b;
+  --card-bg: #ffffff;
+  --elevated-bg: #f8fafc;
+  --divider-color: #e2e8f0;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--on-surface);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* Material Symbols Outlined font support */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
