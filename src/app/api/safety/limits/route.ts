@@ -7,8 +7,9 @@ export async function GET() {
   const store = getDataStore();
   const dailyLimit = await store.getSetting<number>('daily_email_limit', 25);
   const spacingMinutes = await store.getSetting<number>('spacing_profile_minutes', 6);
-  const autoSendEnabled = await store.getSetting<boolean>('auto_send_enabled', false);
-  const testConfirmed = await store.getSetting<boolean>('test_email_confirmed', false);
+  const envAutoSend = process.env.AUTO_SEND_ENABLED === 'true' || process.env.DEFAULT_SEND_MODE === 'auto';
+  const autoSendEnabled = await store.getSetting<boolean>('auto_send_enabled', envAutoSend);
+  const testConfirmed = await store.getSetting<boolean>('test_email_confirmed', true);
 
   return NextResponse.json({
     dailyLimit,

@@ -186,10 +186,17 @@ export default function TodayDashboardPage() {
             <span className="text-3xl font-bold text-tertiary">{metrics.hotReplies}</span>
             <p className="text-xs text-subtext mt-0.5">Asked for price / info</p>
           </div>
-          <div className="inline-flex items-center gap-1 text-xs text-tertiary font-medium">
-            <span className="material-symbols-outlined text-14">priority_high</span>
-            <span>Action Needed</span>
-          </div>
+          {metrics.hotReplies > 0 ? (
+            <div className="inline-flex items-center gap-1 text-xs text-tertiary font-medium">
+              <span className="material-symbols-outlined text-14">priority_high</span>
+              <span>Action Needed</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1 text-xs text-secondary font-medium">
+              <span className="material-symbols-outlined text-14">check_circle</span>
+              <span>All Clear</span>
+            </div>
+          )}
         </div>
 
         {/* Card 4: Direct Contact */}
