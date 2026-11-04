@@ -230,7 +230,7 @@ export function findSeedBusinesses(query: string, maxCount = 5): GooglePlaceResu
     (b) =>
       q.includes(b.city.toLowerCase()) ||
       q.includes(b.industry.toLowerCase()) ||
-      b.displayName.text.toLowerCase().includes(q)
+      Boolean(b.displayName?.text?.toLowerCase().includes(q))
   );
 
   const selected = matches.length > 0 ? matches : VERIFIED_SEED_BUSINESSES;
@@ -249,3 +249,4 @@ export function findSeedBusinesses(query: string, maxCount = 5): GooglePlaceResu
     types: b.types,
   }));
 }
+
