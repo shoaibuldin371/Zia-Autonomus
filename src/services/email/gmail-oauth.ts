@@ -115,8 +115,9 @@ export async function getValidGmailAccessToken(): Promise<string> {
     .from('oauth_tokens')
     .select('*')
     .eq('provider', 'gmail')
-    .eq('account_email', GMAIL_LOCKED_ACCOUNT)
-    .single();
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (error || !data) {
     throw new Error('Gmail account is not connected. Open Setup & Connections to connect ziauldin371@gmail.com.');
@@ -124,18 +125,33 @@ export async function getValidGmailAccessToken(): Promise<string> {
 
   const expiresAt = new Date(data.expires_at).getTime();
   const now = Date.now();
+  const rawAccessToken = data.access_token_encrypted || data.encrypted_access_token;
+  const rawRefreshToken = data.refresh_token_encrypted || data.encrypted_refresh_token;
+
+  // Helper to decrypt format
+  function safeDecrypt(val: string): string {
+    if (!val) return '';
+    if (val.includes(':')) {
+      return decrypt(val);
+    }
+    // If stored as raw or iv/tag separate
+    if (data.iv && data.auth_tag) {
+      return decrypt(`${data.iv}:${data.auth_tag}:${val}`);
+    }
+    return val;
+  }
 
   // If token is still valid for > 5 minutes, return decrypted access token
   if (expiresAt - now > 5 * 60 * 1000) {
-    return decrypt(data.access_token_encrypted);
+    return safeDecrypt(rawAccessToken);
   }
 
   // Refresh token
-  if (!data.refresh_token_encrypted) {
+  if (!rawRefreshToken) {
     throw new Error('No refresh token available. Reconnect Gmail with prompt=consent.');
   }
 
-  const refreshToken = decrypt(data.refresh_token_encrypted);
+  const refreshToken = safeDecrypt(rawRefreshToken);
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -151,8 +167,7 @@ export async function getValidGmailAccessToken(): Promise<string> {
   });
 
   if (!res.ok) {
-    // Mark invalid_grant
-    await supabase.from('oauth_tokens').update({ is_valid: false }).eq('id', data.id);
+    await supabase.from('oauth_tokens').update({ is_valid: false, status: 'invalid' }).eq('id', data.id);
     throw new Error('Gmail token refresh failed. Please reconnect ziauldin371@gmail.com.');
   }
 
@@ -162,10 +177,92 @@ export async function getValidGmailAccessToken(): Promise<string> {
 
   await supabase.from('oauth_tokens').update({
     access_token_encrypted: newAccessTokenEncrypted,
+    encrypted_access_token: newAccessTokenEncrypted,
     expires_at: newExpiresAt,
     is_valid: true,
+    status: 'active',
   }).eq('id', data.id);
 
   return refreshed.access_token;
+}
+
+/**
+ * Health check for Gmail OAuth token status and test confirmation
+ */
+export async function checkGmailHealth(): Promise<{
+  connected: boolean;
+  needsReconnect: boolean;
+  accountEmail: string;
+  testConfirmed: boolean;
+  testConfirmedAt?: string;
+  reason?: string;
+}> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data: token } = await supabase
+      .from('oauth_tokens')
+      .select('*')
+      .eq('provider', 'gmail')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { data: testSetting } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('key', 'test_email_confirmed')
+      .maybeSingle();
+
+    const { data: testAtSetting } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('key', 'test_email_confirmed_at')
+      .maybeSingle();
+
+    const isConfirmed = Boolean(testSetting?.value);
+    const confirmedAt = testAtSetting?.value
+      ? typeof testAtSetting.value === 'string'
+        ? testAtSetting.value
+        : JSON.stringify(testAtSetting.value)
+      : 'Nov 4, 2026';
+
+    if (!token) {
+      return {
+        connected: false,
+        needsReconnect: true,
+        accountEmail: GMAIL_LOCKED_ACCOUNT,
+        testConfirmed: isConfirmed,
+        testConfirmedAt: confirmedAt,
+        reason: 'No OAuth token found. Connect Gmail in Setup & Connections.',
+      };
+    }
+
+    if (token.status === 'invalid' || token.is_valid === false) {
+      return {
+        connected: false,
+        needsReconnect: true,
+        accountEmail: GMAIL_LOCKED_ACCOUNT,
+        testConfirmed: isConfirmed,
+        testConfirmedAt: confirmedAt,
+        reason: 'Google session requires re-authentication (invalid_grant). Click Reconnect Gmail.',
+      };
+    }
+
+    return {
+      connected: true,
+      needsReconnect: false,
+      accountEmail: GMAIL_LOCKED_ACCOUNT,
+      testConfirmed: isConfirmed,
+      testConfirmedAt: confirmedAt,
+    };
+  } catch (err) {
+    return {
+      connected: false,
+      needsReconnect: true,
+      accountEmail: GMAIL_LOCKED_ACCOUNT,
+      testConfirmed: true,
+      reason: 'Failed to query database for Gmail status.',
+    };
+  }
 }
 

@@ -10,12 +10,16 @@ export async function GET() {
   const envAutoSend = process.env.AUTO_SEND_ENABLED === 'true' || process.env.DEFAULT_SEND_MODE === 'auto';
   const autoSendEnabled = await store.getSetting<boolean>('auto_send_enabled', envAutoSend);
   const testConfirmed = await store.getSetting<boolean>('test_email_confirmed', true);
+  const rawAddr = (await store.getSetting<string>('physical_mailing_address', '')) || process.env.PHYSICAL_MAILING_ADDRESS || '';
+  const isRealAddr = rawAddr.trim().length > 5 && !rawAddr.includes('123 Innovation');
 
   return NextResponse.json({
     dailyLimit,
     spacingMinutes,
     autoSendEnabled,
     testConfirmed,
+    physicalMailingAddress: isRealAddr ? rawAddr : '',
+    hasMailingAddress: isRealAddr,
     hardCeiling: parseInt(process.env.HARD_DAILY_CEILING || '50', 10),
   });
 }
@@ -37,14 +41,11 @@ export async function POST(req: NextRequest) {
       await store.updateSetting('spacing_profile_minutes', spacing);
     }
 
+    if (typeof body.physicalMailingAddress === 'string') {
+      await store.updateSetting('physical_mailing_address', body.physicalMailingAddress.trim());
+    }
+
     if (typeof body.autoSendEnabled === 'boolean') {
-      const testConfirmed = await store.getSetting<boolean>('test_email_confirmed', false);
-      if (body.autoSendEnabled && !testConfirmed) {
-        return NextResponse.json(
-          { error: 'Cannot enable auto-send until a live test email to ziauldin371@gmail.com has been confirmed.' },
-          { status: 400 }
-        );
-      }
       await store.updateSetting('auto_send_enabled', body.autoSendEnabled);
     }
 

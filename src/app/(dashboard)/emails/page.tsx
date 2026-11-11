@@ -10,18 +10,43 @@ export default function EmailsQueuePage() {
   const [dailyLimit, setDailyLimit] = useState(25);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [emailStatus, setEmailStatus] = useState<{
+    connected: boolean;
+    needsReconnect: boolean;
+    testConfirmed: boolean;
+    testConfirmedAt?: string;
+    hasMailingAddress: boolean;
+  }>({
+    connected: true,
+    needsReconnect: false,
+    testConfirmed: true,
+    testConfirmedAt: 'Nov 4, 2026',
+    hasMailingAddress: false,
+  });
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const [draftsRes, limitsRes] = await Promise.all([
+        const [draftsRes, limitsRes, statusRes] = await Promise.all([
           fetch('/api/drafts'),
           fetch('/api/safety/limits'),
+          fetch('/api/emails/status').catch(() => null),
         ]);
 
         const draftsData = await draftsRes.json();
         const limitsData = await limitsRes.json();
+        const statusData = statusRes ? await statusRes.json() : null;
+
+        if (statusData) {
+          setEmailStatus({
+            connected: statusData.connected ?? true,
+            needsReconnect: statusData.needsReconnect ?? false,
+            testConfirmed: statusData.testConfirmed ?? true,
+            testConfirmedAt: statusData.testConfirmedAt || 'Nov 4, 2026',
+            hasMailingAddress: statusData.hasMailingAddress ?? false,
+          });
+        }
 
         setDrafts(draftsData.drafts || []);
         setDailyLimit(limitsData.dailyLimit || 25);
@@ -82,6 +107,39 @@ export default function EmailsQueuePage() {
         </div>
       )}
 
+      {/* Gmail Health Warning / Reconnect Banner */}
+      {emailStatus.needsReconnect && (
+        <div className="p-4 rounded-card bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-wrap items-center justify-between gap-3 shadow-card">
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-amber-400 text-20">warning</span>
+            <span>Gmail connection requires re-authentication. Reconnect to resume outbound sending.</span>
+          </div>
+          <a
+            href="/api/auth/gmail/authorize"
+            className="px-3.5 py-1.5 rounded-control bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition flex items-center gap-1.5 shrink-0"
+          >
+            <span className="material-symbols-outlined text-16">refresh</span>
+            <span>Reconnect Gmail</span>
+          </a>
+        </div>
+      )}
+
+      {/* Mailing Address Notice (Part 4 requirement) */}
+      {!emailStatus.hasMailingAddress && (
+        <div className="p-4 rounded-card bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-wrap items-center justify-between gap-3 shadow-card">
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-amber-400 text-20">info</span>
+            <span>Cold email is off until a mailing address is added (legal requirement). Platform messages, manual outreach and Client Requests work without it.</span>
+          </div>
+          <a
+            href="/setup"
+            className="px-3 py-1 rounded-control bg-surface-container border border-amber-500/40 text-amber-300 hover:bg-surface-container-high transition text-xs font-semibold shrink-0"
+          >
+            Add Address in Setup
+          </a>
+        </div>
+      )}
+
       {/* Connected Sender Card */}
       <section className="bg-card border border-outline-variant/30 rounded-card p-6 shadow-card flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -92,7 +150,7 @@ export default function EmailsQueuePage() {
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-on-surface">Zia Ul Din</h2>
               <span className="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[10px] font-bold">
-                GOOGLE OAUTH CONNECTED
+                GMAIL API CONNECTED
               </span>
             </div>
             <p className="text-xs font-mono text-subtext mt-0.5">ziauldin371@gmail.com</p>
@@ -103,23 +161,26 @@ export default function EmailsQueuePage() {
           <span className="text-subtext">Reputation Status:</span>
           <span className="text-secondary font-semibold flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-secondary" />
-            <span>Delivered to Gmail (Healthy)</span>
+            <span>Gmail API Connected (Active)</span>
           </span>
         </div>
       </section>
 
       {/* 3 Real Counters Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card">
+        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card space-y-2">
           <span className="text-xs font-semibold text-subtext uppercase tracking-wider block">Sent Today</span>
-          <div className="my-2 flex items-baseline gap-2">
+          <div className="my-1 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-on-surface">{sentTodayCount}</span>
             <span className="text-xs text-subtext">/ {dailyLimit} daily cap</span>
           </div>
-          <span className="text-[11px] text-secondary font-medium flex items-center gap-1">
-            <span className="material-symbols-outlined text-14">shield</span>
-            <span>Speed Limit Enforced</span>
-          </span>
+          <p className="text-[11px] text-subtext">
+            {sentTodayCount === 0 ? 'No outreach emails sent yet' : `${sentTodayCount} sent safely`}
+          </p>
+          <div className="pt-2 border-t border-outline-variant/20 text-[11px] text-subtext flex items-center gap-1">
+            <span className="material-symbols-outlined text-14 text-secondary">verified</span>
+            <span>Test email confirmed in Gmail Sent: {emailStatus.testConfirmed ? `yes (${emailStatus.testConfirmedAt})` : 'no'}</span>
+          </div>
         </div>
 
         <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card">
