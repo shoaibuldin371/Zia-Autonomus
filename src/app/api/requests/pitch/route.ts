@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       const item = processClientRequestItem({
         id: existing.id,
         source_platform: existing.source_platform,
-        quote: existing.quote,
+        quote: existing.quote || undefined,
         company_name: existing.company_name,
         budget: existing.budget,
       });
@@ -57,11 +57,15 @@ export async function POST(req: NextRequest) {
       const pitchResult = await generatePitchWithGemini({
         businessName: existing.company_name || existing.platform_username || 'Client',
         industry: item.service_fit,
-        websiteStatus: 'healthy',
-        rating: 5,
-        reviewCount: 1,
+        city: 'Remote',
         evidence: [
-          { evidence_type: 'client_request', is_factual: true, notes: item.quote },
+          {
+            business_id: existing.id,
+            source_name: existing.source_platform,
+            summary: item.quote,
+            evidence_type: 'client_request',
+            is_factual: true,
+          },
         ],
         offerName: item.service_fit,
         offerPriceUsd: 1500,

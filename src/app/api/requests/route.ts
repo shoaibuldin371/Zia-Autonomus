@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const source = searchParams.get('source') || undefined;
 
     const store = getDataStore();
-    const rawRequests = await store.getClientRequests(100);
+    const rawRequests = await store.getClientRequests({ limit: 100 });
 
     // Process & rescore all items with nuanced rules
     const processed: ScoredClientRequest[] = rawRequests.map((r: any) => {

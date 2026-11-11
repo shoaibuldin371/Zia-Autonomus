@@ -65,7 +65,7 @@ export function detectCompanySize(text: string, companyName?: string | null): { 
     return { isLarge: true, sizeLabel: 'Enterprise (>500)' };
   }
 
-  for (const enterprise of KNOWN_LARGE_ENTERPRISES) {
+  for (const enterprise of Array.from(KNOWN_LARGE_ENTERPRISES)) {
     if (new RegExp(`\\b${enterprise}\\b`, 'i').test(lower)) {
       return { isLarge: true, sizeLabel: 'Enterprise (>500)' };
     }

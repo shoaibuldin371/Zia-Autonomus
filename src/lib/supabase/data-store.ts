@@ -118,6 +118,26 @@ export interface JobEntity {
   created_at?: string;
 }
 
+export interface ClientRequestEntity {
+  id: string;
+  source_platform: string;
+  source_url?: string | null;
+  post_url?: string | null;
+  quote?: string | null;
+  need_summary?: string | null;
+  match_score: number;
+  service_fit?: string | null;
+  status: string;
+  found_at?: string;
+  person_name?: string | null;
+  company_name?: string | null;
+  platform_username?: string | null;
+  platform_profile_url?: string | null;
+  company_website?: string | null;
+  budget?: string | null;
+  evidence?: any;
+}
+
 export interface IDataStore {
   mode: 'supabase_postgresql' | 'in_memory_dev';
   isConnected(): Promise<boolean>;
@@ -169,6 +189,11 @@ export interface IDataStore {
   // Locks
   acquireLock(key: string, ttlSeconds: number): Promise<boolean>;
   releaseLock(key: string): Promise<void>;
+
+  // Client Requests
+  getClientRequests(options?: { status?: string; limit?: number }): Promise<ClientRequestEntity[]>;
+  getClientRequestById(id: string): Promise<ClientRequestEntity | null>;
+  saveClientRequest(request: Partial<ClientRequestEntity>): Promise<ClientRequestEntity>;
 }
 
 /**
@@ -464,6 +489,36 @@ export class SupabaseDataStore implements IDataStore {
   async releaseLock(key: string): Promise<void> {
     await this.client.from('distributed_locks').delete().eq('lock_key', key);
   }
+
+  async getClientRequests(options: { status?: string; limit?: number } = {}): Promise<ClientRequestEntity[]> {
+    let query = this.client.from('client_requests').select('*');
+    if (options.status) {
+      query = query.eq('status', options.status);
+    }
+    query = query.order('match_score', { ascending: false });
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+    const { data, error } = await query;
+    if (error) throw new Error(`Supabase query failed: ${error.message}`);
+    return (data || []) as ClientRequestEntity[];
+  }
+
+  async getClientRequestById(id: string): Promise<ClientRequestEntity | null> {
+    const { data, error } = await this.client.from('client_requests').select('*').eq('id', id).single();
+    if (error || !data) return null;
+    return data as ClientRequestEntity;
+  }
+
+  async saveClientRequest(request: Partial<ClientRequestEntity>): Promise<ClientRequestEntity> {
+    const { data, error } = await this.client
+      .from('client_requests')
+      .upsert(request)
+      .select()
+      .single();
+    if (error) throw new Error(`Failed to save client request: ${error.message}`);
+    return data as ClientRequestEntity;
+  }
 }
 
 /**
@@ -657,6 +712,31 @@ export class InMemoryDataStore implements IDataStore {
 
   async releaseLock(key: string): Promise<void> {
     this.locks.delete(key);
+  }
+
+  private clientRequests: Map<string, ClientRequestEntity> = new Map();
+
+  async getClientRequests(options: { status?: string; limit?: number } = {}): Promise<ClientRequestEntity[]> {
+    let list = Array.from(this.clientRequests.values());
+    if (options.status) {
+      list = list.filter(r => r.status === options.status);
+    }
+    list.sort((a, b) => b.match_score - a.match_score);
+    if (options.limit) {
+      list = list.slice(0, options.limit);
+    }
+    return list;
+  }
+
+  async getClientRequestById(id: string): Promise<ClientRequestEntity | null> {
+    return this.clientRequests.get(id) || null;
+  }
+
+  async saveClientRequest(request: Partial<ClientRequestEntity>): Promise<ClientRequestEntity> {
+    const id = request.id || `req_${Date.now()}`;
+    const entity = { ...request, id } as ClientRequestEntity;
+    this.clientRequests.set(id, entity);
+    return entity;
   }
 }
 
