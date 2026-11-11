@@ -1,5 +1,6 @@
 import { getValidGmailAccessToken, GMAIL_LOCKED_ACCOUNT } from './gmail-oauth';
 import { buildUnsubscribeUrl } from '@/lib/security/unsubscribe';
+import { isPhysicalMailingAddressValid } from './auto-send-guard';
 
 export interface SendEmailParams {
   to: string;
@@ -8,6 +9,7 @@ export interface SendEmailParams {
   bodyHtml?: string;
   idempotencyKey: string;
   baseUrl?: string;
+  physicalAddress?: string;
 }
 
 export interface SendEmailResult {
@@ -29,6 +31,7 @@ export function buildMimeMessage(params: {
   bodyText: string;
   bodyHtml?: string;
   unsubscribeUrl?: string;
+  physicalAddress?: string;
 }): string {
   const lines: string[] = [
     `From: ${params.fromName} <${params.fromEmail}>`,
@@ -48,12 +51,11 @@ export function buildMimeMessage(params: {
   lines.push(''); // Empty line before body
   lines.push(params.bodyText);
 
-  if (params.unsubscribeUrl) {
-    const address = process.env.PHYSICAL_MAILING_ADDRESS || 'Zia Ul Din, USA';
+  if (params.unsubscribeUrl && params.physicalAddress && isPhysicalMailingAddressValid(params.physicalAddress)) {
     lines.push('');
     lines.push('---');
     lines.push(`Unsubscribe: ${params.unsubscribeUrl}`);
-    lines.push(`Physical address: ${address}.`);
+    lines.push(`Physical address: ${params.physicalAddress.trim()}.`);
   }
 
   const rawMime = lines.join('\r\n');
@@ -68,6 +70,17 @@ export function buildMimeMessage(params: {
  * Sends an email via Gmail API and verifies the SENT label on the resulting message
  */
 export async function sendGmailMessage(params: SendEmailParams): Promise<SendEmailResult> {
+  const isTestToSelf = params.to.toLowerCase() === GMAIL_LOCKED_ACCOUNT;
+  const address = params.physicalAddress || process.env.PHYSICAL_MAILING_ADDRESS;
+
+  if (!isTestToSelf) {
+    if (!address || !isPhysicalMailingAddressValid(address)) {
+      throw new Error(
+        'Cold email cannot be sent without a verified physical mailing address in the signature (legal requirement).'
+      );
+    }
+  }
+
   const accessToken = await getValidGmailAccessToken();
   const baseUrl = params.baseUrl || process.env.APP_BASE_URL || 'http://localhost:3000';
   const unsubscribeUrl = buildUnsubscribeUrl(baseUrl, params.to);
@@ -79,7 +92,8 @@ export async function sendGmailMessage(params: SendEmailParams): Promise<SendEma
     subject: params.subject,
     bodyText: params.bodyText,
     bodyHtml: params.bodyHtml,
-    unsubscribeUrl: params.to.toLowerCase() === GMAIL_LOCKED_ACCOUNT ? undefined : unsubscribeUrl,
+    unsubscribeUrl: isTestToSelf ? undefined : unsubscribeUrl,
+    physicalAddress: isTestToSelf ? undefined : address,
   });
 
   // 1. Post to Gmail API
@@ -135,4 +149,3 @@ export async function sendTestEmailToMyself(): Promise<SendEmailResult> {
     idempotencyKey: `test_send_${Date.now()}`,
   });
 }
-

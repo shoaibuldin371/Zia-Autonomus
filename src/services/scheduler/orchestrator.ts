@@ -5,6 +5,7 @@ import { calculateOpportunity } from '../discovery/scoring';
 import { findDuplicateBusiness } from '../discovery/dedupe';
 import { generatePitchWithGemini } from '../pitch/gemini-client';
 import { sendGmailMessage } from '../email/gmail-sender';
+import { isPhysicalMailingAddressValid } from '../email/auto-send-guard';
 
 export interface DiscoveryRunParams {
   city: string;
@@ -188,8 +189,13 @@ export async function executeDiscoveryRun(
         channel: 'email',
       });
 
+      // Cold email auto-send is strictly OFF until physical mailing address is verified
+      const dbAddress = await store.getSetting<string>('physical_mailing_address', '');
+      const validAddress = isPhysicalMailingAddressValid(dbAddress || process.env.PHYSICAL_MAILING_ADDRESS);
+
       const sendMode = process.env.DEFAULT_SEND_MODE || 'auto';
-      const isAutoSend = sendMode === 'auto';
+      // Auto-send can only be active if BOTH sendMode === 'auto' AND valid physical address exists
+      const isAutoSend = sendMode === 'auto' && validAddress;
       const recipientEmail = 'inquiry@' + (rawWebsite ? new URL(rawWebsite).hostname.replace(/^www\./, '') : 'localbusiness.com');
       const pitchSubject = pitch.subject || `Website for ${name}`;
 
@@ -202,7 +208,7 @@ export async function executeDiscoveryRun(
         requires_approval: !isAutoSend,
       });
 
-      if (isAutoSend) {
+      if (isAutoSend && validAddress) {
         try {
           const sendResult = await sendGmailMessage({
             to: recipientEmail,

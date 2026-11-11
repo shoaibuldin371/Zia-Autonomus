@@ -21,12 +21,42 @@ export interface GuardContext {
   hasVerifiedEmail: boolean;
 }
 
+export function isPhysicalMailingAddressValid(address?: string | null): boolean {
+  if (!address || typeof address !== 'string') return false;
+  const trimmed = address.trim();
+  if (trimmed.length < 10) return false;
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.includes('placeholder') ||
+    lower.includes('123 innovation') ||
+    lower === 'zia ul din, usa' ||
+    lower === 'none' ||
+    lower === 'tbd'
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export async function evaluateAutoSendGuard(
   ctx: GuardContext,
   store: IDataStore
 ): Promise<GuardEvaluation> {
   const reasons: string[] = [];
   const passedChecks: string[] = [];
+
+  // 0. Physical Mailing Address Check (Mandatory CAN-SPAM / Legal Requirement)
+  const configuredAddress =
+    (await store.getSetting<string>('physical_mailing_address', '')) ||
+    process.env.PHYSICAL_MAILING_ADDRESS ||
+    '';
+  if (!isPhysicalMailingAddressValid(configuredAddress)) {
+    reasons.push(
+      'Cold email is off until a mailing address is added (legal requirement). Platform messages, manual outreach and Client Requests work without it.'
+    );
+  } else {
+    passedChecks.push('Valid physical mailing address configured');
+  }
 
   // 1. Emergency Stop Check
   const emergencyStop = await store.getSetting<boolean>('emergency_stop', false);
@@ -129,4 +159,3 @@ export async function evaluateAutoSendGuard(
     passedChecks,
   };
 }
-
