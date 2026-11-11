@@ -16,15 +16,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: '/', label: 'Today', icon: 'home', desc: 'Daily triage & pipeline pace' },
-    { href: '/businesses', label: 'Found', icon: 'radar', desc: 'Live Radar & verified leads' },
+    { href: '/requests', label: 'Client Requests', icon: 'bolt', desc: 'Companies and people that need your skills (Wellfound, Contra, Hacker News and more)' },
+    { href: '/businesses', label: 'Businesses Found', icon: 'radar', desc: 'Live Radar & verified leads' },
     { href: '/emails', label: 'Emails', icon: 'mail', desc: 'Sent & queue with Gmail sync' },
-    { href: '/contact-manually', label: 'Manual', icon: 'call', desc: 'Phone scripts & social touches' },
+    { href: '/contact-manually', label: 'Local Business Contacts', icon: 'call', desc: 'Shops and clinics with no email: call or message them' },
     { href: '/safety', label: 'Safety & Rules', icon: 'shield', desc: 'Guardian shield & limits' },
   ];
 
   const moreItems = [
     { href: '/platforms', label: 'Platforms', icon: 'hub', desc: '89 AI & marketplace channels' },
-    { href: '/requests', label: 'Hot Client Requests', icon: 'bolt', desc: 'Paste client post for proposal' },
     { href: '/search-plan', label: 'Search Plan', icon: 'map', desc: 'Rotating metro coverage matrix' },
     { href: '/setup', label: 'Setup & Connections', icon: 'settings', desc: 'Traffic light API diagnostics' },
     { href: '/compliance', label: 'Compliance & Suppression', icon: 'gavel', desc: 'Global do-not-contact list' },

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function ContactManuallyPage() {
   const [activeChannel, setActiveChannel] = useState<'all' | 'call' | 'whatsapp' | 'instagram'>('all');
@@ -40,12 +41,29 @@ export default function ContactManuallyPage() {
         </div>
       )}
 
+      {/* Professional Scope Notice */}
+      <div className="p-4 rounded-card bg-surface-container-high border border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <p className="text-subtext max-w-2xl leading-relaxed">
+          This page is only for local shops and clinics found by Find Businesses Now. For professional platforms and companies that need AI, automation or web work, go to Client Requests.
+        </p>
+        <Link
+          href="/requests"
+          className="px-3.5 py-1.5 rounded-control bg-primary-container hover:bg-primary-hover text-white font-semibold transition flex items-center gap-1.5 shadow-glow shrink-0"
+        >
+          <span className="material-symbols-outlined text-16">bolt</span>
+          <span>Go to Client Requests</span>
+        </Link>
+      </div>
+
       {/* Intro Banner */}
       <section className="bg-card border border-outline-variant/30 rounded-card p-6 shadow-card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-24">phone_in_talk</span>
-            <h1 className="text-xl font-bold text-on-surface">Direct Phone & Social Outreach</h1>
+            <div>
+              <h1 className="text-xl font-bold text-on-surface">Local Business Contacts</h1>
+              <p className="text-xs text-subtext mt-0.5">Shops and clinics with no email: call or message them</p>
+            </div>
           </div>
           <span className="px-2.5 py-1 rounded-pill bg-tertiary-container/30 text-tertiary text-xs font-semibold border border-tertiary/30">
             Manual Actions Only • No Bot Calling

@@ -9,6 +9,7 @@ interface TodayMetrics {
   dailyLimit: number;
   hotReplies: number;
   directContact: number;
+  strongClientRequests: number;
   emergencyStop: boolean;
   autoSendEnabled: boolean;
   systemCalm: boolean;
@@ -21,6 +22,7 @@ export default function TodayDashboardPage() {
     dailyLimit: 25,
     hotReplies: 0,
     directContact: 0,
+    strongClientRequests: 0,
     emergencyStop: false,
     autoSendEnabled: false,
     systemCalm: true,
@@ -31,13 +33,15 @@ export default function TodayDashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [limitsRes, healthRes] = await Promise.all([
+        const [limitsRes, healthRes, requestsRes] = await Promise.all([
           fetch('/api/safety/limits'),
           fetch('/api/health'),
+          fetch('/api/requests').catch(() => null),
         ]);
 
         const limitsData = await limitsRes.json();
         const healthData = await healthRes.json();
+        const requestsData = requestsRes ? await requestsRes.json() : null;
 
         setMetrics((prev) => ({
           ...prev,
@@ -45,6 +49,7 @@ export default function TodayDashboardPage() {
           autoSendEnabled: Boolean(limitsData.autoSendEnabled),
           emergencyStop: Boolean(healthData.safety?.emergencyStopActive),
           systemCalm: healthData.status === 'healthy',
+          strongClientRequests: requestsData?.stats?.strongMatches || 0,
         }));
       } catch {
         // Fallback to safe defaults
@@ -126,28 +131,50 @@ export default function TodayDashboardPage() {
         {/* Quick Action Launchpad */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <Link
-            href="/businesses"
+            href="/requests"
             className="py-2.5 px-4 rounded-control bg-primary-container hover:bg-primary-hover text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-glow"
           >
-            <span className="material-symbols-outlined text-18">radar</span>
-            <span>View Found Businesses</span>
+            <span className="material-symbols-outlined text-18">bolt</span>
+            <span>View Client Requests</span>
           </Link>
           <Link
-            href="/contact-manually"
+            href="/businesses"
             className="py-2.5 px-4 rounded-control bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold flex items-center justify-center gap-2 transition"
           >
-            <span className="material-symbols-outlined text-18 text-tertiary">phone_in_talk</span>
-            <span>Call Hot Leads Queue</span>
+            <span className="material-symbols-outlined text-18 text-secondary">radar</span>
+            <span>Find Businesses</span>
           </Link>
         </div>
       </section>
 
       {/* 4 Metric Cards Grid */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Found Today */}
-        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between">
+        {/* Card 1: Client Requests (First Big Card linking to /requests) */}
+        <Link
+          href="/requests"
+          className="bg-card border border-primary/40 rounded-card p-5 shadow-glow flex flex-col justify-between hover:border-primary transition group"
+        >
           <div className="flex items-center justify-between text-subtext">
-            <span className="text-xs font-semibold uppercase tracking-wider">Found Today</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary group-hover:underline">Client Requests</span>
+            <span className="material-symbols-outlined text-primary text-20">bolt</span>
+          </div>
+          <div className="my-3">
+            <span className="text-3xl font-bold text-on-surface">{metrics.strongClientRequests}</span>
+            <p className="text-xs text-subtext mt-0.5">Strong project matches</p>
+          </div>
+          <div className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+            <span className="material-symbols-outlined text-14">open_in_new</span>
+            <span>Open Requests Desk</span>
+          </div>
+        </Link>
+
+        {/* Card 2: Businesses Found */}
+        <Link
+          href="/businesses"
+          className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between hover:border-outline-variant/60 transition"
+        >
+          <div className="flex items-center justify-between text-subtext">
+            <span className="text-xs font-semibold uppercase tracking-wider">Businesses Found</span>
             <span className="material-symbols-outlined text-secondary text-20">domain</span>
           </div>
           <div className="my-3">
@@ -158,10 +185,13 @@ export default function TodayDashboardPage() {
             <span className="material-symbols-outlined text-14">check_circle</span>
             <span>Verified Data</span>
           </div>
-        </div>
+        </Link>
 
-        {/* Card 2: Sent Safely */}
-        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between">
+        {/* Card 3: Sent Safely */}
+        <Link
+          href="/emails"
+          className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between hover:border-outline-variant/60 transition"
+        >
           <div className="flex items-center justify-between text-subtext">
             <span className="text-xs font-semibold uppercase tracking-wider">Sent Safely</span>
             <span className="material-symbols-outlined text-primary text-20">forward_to_inbox</span>
@@ -174,46 +204,26 @@ export default function TodayDashboardPage() {
             <span className="material-symbols-outlined text-14">verified</span>
             <span>On Track</span>
           </div>
-        </div>
+        </Link>
 
-        {/* Card 3: Hot Replies */}
-        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between">
+        {/* Card 4: Local Business Contacts */}
+        <Link
+          href="/contact-manually"
+          className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between hover:border-outline-variant/60 transition"
+        >
           <div className="flex items-center justify-between text-subtext">
-            <span className="text-xs font-semibold uppercase tracking-wider text-tertiary">Hot Replies</span>
-            <span className="material-symbols-outlined text-tertiary text-20">mark_email_unread</span>
-          </div>
-          <div className="my-3">
-            <span className="text-3xl font-bold text-tertiary">{metrics.hotReplies}</span>
-            <p className="text-xs text-subtext mt-0.5">Asked for price / info</p>
-          </div>
-          {metrics.hotReplies > 0 ? (
-            <div className="inline-flex items-center gap-1 text-xs text-tertiary font-medium">
-              <span className="material-symbols-outlined text-14">priority_high</span>
-              <span>Action Needed</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1 text-xs text-secondary font-medium">
-              <span className="material-symbols-outlined text-14">check_circle</span>
-              <span>All Clear</span>
-            </div>
-          )}
-        </div>
-
-        {/* Card 4: Direct Contact */}
-        <div className="bg-card border border-outline-variant/30 rounded-card p-5 shadow-card flex flex-col justify-between">
-          <div className="flex items-center justify-between text-subtext">
-            <span className="text-xs font-semibold uppercase tracking-wider">Direct Contact</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Local Business Contacts</span>
             <span className="material-symbols-outlined text-outline text-20">contact_phone</span>
           </div>
           <div className="my-3">
             <span className="text-3xl font-bold text-on-surface">{metrics.directContact}</span>
-            <p className="text-xs text-subtext mt-0.5">No email found</p>
+            <p className="text-xs text-subtext mt-0.5">Shops &amp; clinics with no email</p>
           </div>
           <div className="inline-flex items-center gap-1 text-xs text-subtext font-medium">
-            <span className="material-symbols-outlined text-14">info</span>
-            <span>Call or DM</span>
+            <span className="material-symbols-outlined text-14">call</span>
+            <span>Call or message them</span>
           </div>
-        </div>
+        </Link>
       </section>
 
       {/* Priority Section: Needs Your Eyes Today */}
