@@ -254,14 +254,44 @@ export class SupabaseDataStore implements IDataStore {
   }
 
   async saveBusiness(business: Partial<BusinessEntity>): Promise<BusinessEntity> {
-    const { opportunity_text, website_status, best_way_to_reach, is_demo, ...dbColumns } = business;
+    const validKeys = [
+      'id', 'organization_id', 'name', 'normalized_name', 'domain', 'normalized_domain',
+      'country', 'region', 'city', 'postal_code', 'address', 'phone', 'industry',
+      'company_type', 'employee_count_range', 'annual_revenue_range', 'pipeline_type',
+      'qualification_status', 'discovery_run_id', 'source_provider', 'source_identifier',
+      'is_archived', 'created_at', 'updated_at', 'fetched_at', 'raw_payload_ref',
+      'last_verified_at', 'is_permanently_closed', 'heat_score', 'trigger_freshness_rank',
+      'decision_maker_role', 'decision_maker_name'
+    ];
+
+    const dbPayload: Record<string, unknown> = {
+      id: business.id || crypto.randomUUID(),
+      organization_id: (business as Record<string, unknown>).organization_id || '00000000-0000-0000-0000-000000000001',
+      name: business.name || 'Local Business',
+      normalized_name: (business.normalized_name || business.name || '').toLowerCase(),
+      country: business.country || 'UK',
+      pipeline_type: business.pipeline_type || 'website_opportunities',
+      qualification_status: business.qualification_status || 'qualified',
+      source_provider: business.source_provider || 'google_places',
+      is_archived: false,
+      is_permanently_closed: false,
+      heat_score: (business as Record<string, unknown>).heat_score || 0,
+      trigger_freshness_rank: 0,
+    };
+
+    for (const key of validKeys) {
+      if ((business as Record<string, unknown>)[key] !== undefined) {
+        dbPayload[key] = (business as Record<string, unknown>)[key];
+      }
+    }
+
     const { data, error } = await this.client
       .from('businesses')
-      .upsert(dbColumns)
+      .upsert(dbPayload)
       .select()
       .single();
     if (error) throw new Error(`Failed to save business: ${error.message}`);
-    return { ...data, opportunity_text } as BusinessEntity;
+    return { ...data, opportunity_text: business.opportunity_text } as BusinessEntity;
   }
 
   async getEvidence(businessId: string): Promise<EvidenceEntity[]> {
