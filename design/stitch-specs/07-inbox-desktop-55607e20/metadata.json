@@ -1,0 +1,18 @@
+{
+  "deviceType": "DESKTOP",
+  "height": "2778",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/55607e20488c4364a4be0b16a100d452:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/55607e20488c4364a4be0b16a100d452/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/55607e20488c4364a4be0b16a100d452",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_000660150c334a09023bdf86ba0e0370:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/55607e20488c4364a4be0b16a100d452/fileEntries/screenshot"
+  },
+  "title": "Inbox",
+  "width": "2560"
+}

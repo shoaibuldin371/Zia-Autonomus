@@ -1,0 +1,18 @@
+{
+  "deviceType": "DESKTOP",
+  "height": "2652",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/4a4263a10b95482a9691bc14411a6db8:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/4a4263a10b95482a9691bc14411a6db8/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/4a4263a10b95482a9691bc14411a6db8",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_000660150c9ceb1f05f118f79b0410b3:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/4a4263a10b95482a9691bc14411a6db8/fileEntries/screenshot"
+  },
+  "title": "Opportunities",
+  "width": "2560"
+}

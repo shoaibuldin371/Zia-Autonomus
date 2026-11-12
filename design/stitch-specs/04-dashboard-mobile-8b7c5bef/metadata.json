@@ -1,0 +1,18 @@
+{
+  "deviceType": "MOBILE",
+  "height": "3564",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/8b7c5beffe934e5194bf04026c64eb83:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/8b7c5beffe934e5194bf04026c64eb83/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/8b7c5beffe934e5194bf04026c64eb83",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_00066014873028a204e750f48209890b:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/8b7c5beffe934e5194bf04026c64eb83/fileEntries/screenshot"
+  },
+  "title": "Dashboard",
+  "width": "780"
+}

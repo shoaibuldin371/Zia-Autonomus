@@ -1,0 +1,18 @@
+{
+  "deviceType": "DESKTOP",
+  "height": "3444",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/b5868f8377534cc2aff3c9f89c9a5fdc:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/b5868f8377534cc2aff3c9f89c9a5fdc/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/b5868f8377534cc2aff3c9f89c9a5fdc",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_000660150c62d854044f5a18f92315bd:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/b5868f8377534cc2aff3c9f89c9a5fdc/fileEntries/screenshot"
+  },
+  "title": "Platform Projects",
+  "width": "2560"
+}

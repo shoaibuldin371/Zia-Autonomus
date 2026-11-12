@@ -1,0 +1,18 @@
+{
+  "deviceType": "DESKTOP",
+  "height": "3532",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/e1d12d5a8d4e4af78d926bfccd5c4457:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/e1d12d5a8d4e4af78d926bfccd5c4457/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/e1d12d5a8d4e4af78d926bfccd5c4457",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_000660150c7dc9aa044f595500167679:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/e1d12d5a8d4e4af78d926bfccd5c4457/fileEntries/screenshot"
+  },
+  "title": "Dashboard",
+  "width": "2560"
+}

@@ -1,0 +1,18 @@
+{
+  "deviceType": "MOBILE",
+  "height": "3428",
+  "htmlCode": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/07f56ef2d335481db89edd0fc1ff9d07:download",
+    "mimeType": "text/html",
+    "name": "projects/14243165444609509840/screens/07f56ef2d335481db89edd0fc1ff9d07/fileEntries/html"
+  },
+  "name": "projects/14243165444609509840/screens/07f56ef2d335481db89edd0fc1ff9d07",
+  "screenType": "DESIGN",
+  "screenshot": {
+    "downloadUrl": "https://stitch.googleapis.com/v1/projects/14243165444609509840/files/screenshot_0006601486e2da8b05f13e25d3184d58:download",
+    "mimeType": "image/png",
+    "name": "projects/14243165444609509840/screens/07f56ef2d335481db89edd0fc1ff9d07/fileEntries/screenshot"
+  },
+  "title": "Inbox",
+  "width": "780"
+}
