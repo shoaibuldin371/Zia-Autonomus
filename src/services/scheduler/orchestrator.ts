@@ -145,7 +145,6 @@ export async function executeDiscoveryRun(
       source_identifier: place.id,
       rating: place.rating,
       user_rating_count: place.userRatingCount,
-      opportunity_text: opportunity.opportunityText,
     });
 
     // Save evidence

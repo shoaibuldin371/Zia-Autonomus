@@ -254,13 +254,14 @@ export class SupabaseDataStore implements IDataStore {
   }
 
   async saveBusiness(business: Partial<BusinessEntity>): Promise<BusinessEntity> {
+    const { opportunity_text, website_status, best_way_to_reach, is_demo, ...dbColumns } = business;
     const { data, error } = await this.client
       .from('businesses')
-      .upsert(business)
+      .upsert(dbColumns)
       .select()
       .single();
     if (error) throw new Error(`Failed to save business: ${error.message}`);
-    return data as BusinessEntity;
+    return { ...data, opportunity_text } as BusinessEntity;
   }
 
   async getEvidence(businessId: string): Promise<EvidenceEntity[]> {
