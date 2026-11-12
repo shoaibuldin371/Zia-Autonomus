@@ -473,12 +473,12 @@ export class SupabaseDataStore implements IDataStore {
     const expiresAt = new Date(now.getTime() + ttlSeconds * 1000);
 
     // Try deleting expired lock first
-    await this.client.from('distributed_locks').delete().eq('lock_key', key).lt('expires_at', now.toISOString());
+    await this.client.from('distributed_locks').delete().eq('lock_name', key).lt('expires_at', now.toISOString());
 
     // Try insert
     const { error } = await this.client.from('distributed_locks').insert({
-      lock_key: key,
-      holder_id: `process_${process.pid}_${Math.random()}`,
+      lock_name: key,
+      locked_by: `process_${process.pid}_${Math.random()}`,
       acquired_at: now.toISOString(),
       expires_at: expiresAt.toISOString(),
     });
@@ -487,7 +487,7 @@ export class SupabaseDataStore implements IDataStore {
   }
 
   async releaseLock(key: string): Promise<void> {
-    await this.client.from('distributed_locks').delete().eq('lock_key', key);
+    await this.client.from('distributed_locks').delete().eq('lock_name', key);
   }
 
   async getClientRequests(options: { status?: string; limit?: number } = {}): Promise<ClientRequestEntity[]> {
