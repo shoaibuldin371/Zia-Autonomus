@@ -193,9 +193,11 @@ export async function executeDiscoveryRun(
       const dbAddress = await store.getSetting<string>('physical_mailing_address', '');
       const validAddress = isPhysicalMailingAddressValid(dbAddress || process.env.PHYSICAL_MAILING_ADDRESS);
 
-      const sendMode = process.env.DEFAULT_SEND_MODE || 'auto';
-      // Auto-send can only be active if BOTH sendMode === 'auto' AND valid physical address exists
-      const isAutoSend = sendMode === 'auto' && validAddress;
+      const autoSendSetting = await store.getSetting<boolean>('auto_send_enabled', false);
+      const dbSendMode = await store.getSetting<string>('send_mode', '');
+      const sendMode = dbSendMode || process.env.DEFAULT_SEND_MODE || (autoSendSetting ? 'auto' : 'approval');
+      // Auto-send is active if (autoSendSetting or sendMode === 'auto') AND valid physical address exists
+      const isAutoSend = (autoSendSetting || sendMode === 'auto') && validAddress;
       const recipientEmail = 'inquiry@' + (rawWebsite ? new URL(rawWebsite).hostname.replace(/^www\./, '') : 'localbusiness.com');
       const pitchSubject = pitch.subject || `Website for ${name}`;
 
@@ -215,6 +217,7 @@ export async function executeDiscoveryRun(
             subject: pitchSubject,
             bodyText: pitch.body,
             idempotencyKey: `auto_send_${draft.id}_${Date.now()}`,
+            physicalAddress: dbAddress || process.env.PHYSICAL_MAILING_ADDRESS,
           });
 
           await store.updateDraftStatus(draft.id, 'sent');
@@ -241,8 +244,8 @@ export async function executeDiscoveryRun(
             touched_at: sendResult.sentAt,
           });
         } catch (sendErr) {
-          // If Gmail API is not yet authorized or token expired, remains queued for auto-dispatch
-          console.warn(`[Auto-Send] Queued for automatic dispatch:`, sendErr);
+          console.warn(`[AutoSend] Failed to auto-send email to ${recipientEmail}:`, sendErr);
+          await store.updateDraftStatus(draft.id, 'queued');
         }
       }
 
