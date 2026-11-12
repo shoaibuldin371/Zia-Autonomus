@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "secret-scan": "node scripts/scan-repository-secrets.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

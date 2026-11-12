@@ -8,11 +8,12 @@ node_modules
 /test-results
 /playwright-report
 
-# Next.js build output
+# Build output
 /.next/
 /out/
 build/
 dist/
+*.zip
 
 # Local database / checkpoints
 .data

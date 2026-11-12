@@ -1,0 +1,9 @@
+#!/bin/sh
+echo "Running pre-commit secrets scan..."
+node scripts/scan-repository-secrets.mjs
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+  echo "Pre-commit hook failed: potential secret detected in working directory!"
+  exit 1
+fi
+exit 0
