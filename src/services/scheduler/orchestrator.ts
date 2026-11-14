@@ -1,6 +1,6 @@
 import { IDataStore } from '@/lib/supabase/data-store';
 import { searchGooglePlacesNew } from '../discovery/places-client';
-import { verifyBusinessWebsite } from '../discovery/website-verifier';
+import { isSocialUrl, verifyBusinessWebsite } from '../discovery/website-verifier';
 import { calculateOpportunity } from '../discovery/scoring';
 import { findDuplicateBusiness } from '../discovery/dedupe';
 import { generatePitchWithGemini } from '../pitch/gemini-client';
@@ -197,7 +197,29 @@ export async function executeDiscoveryRun(
       const sendMode = dbSendMode || process.env.DEFAULT_SEND_MODE || (autoSendSetting ? 'auto' : 'approval');
       // Auto-send is active if (autoSendSetting or sendMode === 'auto') AND valid physical address exists
       const isAutoSend = (autoSendSetting || sendMode === 'auto') && validAddress;
-      const recipientEmail = 'inquiry@' + (rawWebsite ? new URL(rawWebsite).hostname.replace(/^www\./, '') : 'localbusiness.com');
+      // Determine if business has a real independent domain (NOT social profile, NOT empty)
+      let domainHost = '';
+      try {
+        if (rawWebsite) {
+          const socialCheck = isSocialUrl(rawWebsite);
+          if (!socialCheck.isSocial) {
+            const parsed = new URL(rawWebsite);
+            const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+            if (host && host.includes('.') && !host.includes('google.') && !host.includes('yelp.')) {
+              domainHost = host;
+            }
+          }
+        }
+      } catch {
+        domainHost = '';
+      }
+
+      // If business has no real independent website (social only or no site), skip generating fake email
+      if (!domainHost) {
+        continue;
+      }
+
+      const recipientEmail = `contact@${domainHost}`;
       const pitchSubject = pitch.subject || `Website for ${name}`;
 
       const draft = await store.saveDraft({
