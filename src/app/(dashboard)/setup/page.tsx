@@ -296,12 +296,13 @@ export default function SetupAndConnectionsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {conn.name === 'Gmail Integration' && emailStatus.needsReconnect && (
+              {conn.name === 'Gmail Integration' && (
                 <a
                   href="/api/auth/gmail/authorize"
-                  className="px-3 py-1.5 rounded-control bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-600 transition"
+                  className="px-3 py-1.5 rounded-control bg-primary-container text-white text-xs font-bold hover:bg-primary-hover shadow-glow transition flex items-center gap-1"
                 >
-                  Reconnect
+                  <span className="material-symbols-outlined text-[14px]">refresh</span>
+                  <span>Reconnect Gmail</span>
                 </a>
               )}
               <button

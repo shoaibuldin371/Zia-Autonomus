@@ -89,19 +89,52 @@ export async function handleGoogleOAuthCallback(
   const encryptedRefreshToken = refreshToken ? encrypt(refreshToken) : null;
   const encryptedAccessToken = encrypt(accessToken);
 
+  const [accessIv, accessTag, accessCipher] = encryptedAccessToken.split(':');
+  let refreshCipher = '';
+  if (encryptedRefreshToken) {
+    const rParts = encryptedRefreshToken.split(':');
+    refreshCipher = rParts[2] || encryptedRefreshToken;
+  }
+
   // Store in Supabase oauth_tokens table
   const supabase = getSupabaseServerClient();
   const expiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString();
 
-  await supabase.from('oauth_tokens').upsert({
-    provider: 'gmail',
-    account_email: GMAIL_LOCKED_ACCOUNT,
-    access_token_encrypted: encryptedAccessToken,
-    refresh_token_encrypted: encryptedRefreshToken,
-    expires_at: expiresAt,
-    is_valid: true,
-    updated_at: new Date().toISOString(),
-  });
+  const { data: existingToken } = await supabase
+    .from('oauth_tokens')
+    .select('id')
+    .eq('provider', 'gmail')
+    .limit(1)
+    .maybeSingle();
+
+  if (existingToken?.id) {
+    const updatePayload: Record<string, unknown> = {
+      user_email: GMAIL_LOCKED_ACCOUNT,
+      encrypted_access_token: accessCipher,
+      iv: accessIv,
+      auth_tag: accessTag,
+      expires_at: expiresAt,
+      status: 'active',
+      updated_at: new Date().toISOString(),
+    };
+    if (refreshCipher) {
+      updatePayload.encrypted_refresh_token = refreshCipher;
+    }
+    await supabase.from('oauth_tokens').update(updatePayload).eq('id', existingToken.id);
+  } else {
+    await supabase.from('oauth_tokens').insert({
+      user_email: GMAIL_LOCKED_ACCOUNT,
+      provider: 'gmail',
+      encrypted_access_token: accessCipher,
+      encrypted_refresh_token: refreshCipher || null,
+      iv: accessIv,
+      auth_tag: accessTag,
+      expires_at: expiresAt,
+      status: 'active',
+      scopes: GMAIL_SCOPES.split(' '),
+      updated_at: new Date().toISOString(),
+    });
+  }
 
   return { success: true, email: authenticatedEmail };
 }
@@ -125,8 +158,8 @@ export async function getValidGmailAccessToken(): Promise<string> {
 
   const expiresAt = new Date(data.expires_at).getTime();
   const now = Date.now();
-  const rawAccessToken = data.access_token_encrypted || data.encrypted_access_token;
-  const rawRefreshToken = data.refresh_token_encrypted || data.encrypted_refresh_token;
+  const rawAccessToken = data.encrypted_access_token;
+  const rawRefreshToken = data.encrypted_refresh_token;
 
   // Helper to decrypt format
   function safeDecrypt(val: string): string {
@@ -167,20 +200,22 @@ export async function getValidGmailAccessToken(): Promise<string> {
   });
 
   if (!res.ok) {
-    await supabase.from('oauth_tokens').update({ is_valid: false, status: 'invalid' }).eq('id', data.id);
-    throw new Error('Gmail token refresh failed. Please reconnect ziauldin371@gmail.com.');
+    await supabase.from('oauth_tokens').update({ status: 'invalid' }).eq('id', data.id);
+    throw new Error('Gmail token refresh failed (invalid_grant). Please reconnect ziauldin371@gmail.com.');
   }
 
   const refreshed = await res.json();
   const newAccessTokenEncrypted = encrypt(refreshed.access_token);
+  const [newIv, newTag, newCipher] = newAccessTokenEncrypted.split(':');
   const newExpiresAt = new Date(Date.now() + (refreshed.expires_in || 3600) * 1000).toISOString();
 
   await supabase.from('oauth_tokens').update({
-    access_token_encrypted: newAccessTokenEncrypted,
-    encrypted_access_token: newAccessTokenEncrypted,
+    encrypted_access_token: newCipher,
+    iv: newIv,
+    auth_tag: newTag,
     expires_at: newExpiresAt,
-    is_valid: true,
     status: 'active',
+    updated_at: new Date().toISOString(),
   }).eq('id', data.id);
 
   return refreshed.access_token;
