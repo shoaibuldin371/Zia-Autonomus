@@ -38,7 +38,7 @@ export function validateCronRequest(req: NextRequest): CronValidationResult {
   }
 
   const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader) {
     return {
       authorized: false,
       response: NextResponse.json(
@@ -48,7 +48,7 @@ export function validateCronRequest(req: NextRequest): CronValidationResult {
     };
   }
 
-  const token = authHeader.slice(7).trim();
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
   const isValid = constantTimeCompare(token, cronSecret.trim());
 
   if (!isValid) {
