@@ -136,6 +136,40 @@ export default function SetupAndConnectionsPage() {
     setTestingKey(conn.name);
     setTestResult(null);
 
+    if (conn.name === 'Gmail Integration') {
+      try {
+        const res = await fetch('/api/emails/send-test', { method: 'POST' });
+        const data = await res.json();
+        setTestingKey(null);
+        if (res.ok && data.success) {
+          setTestResult({
+            name: conn.name,
+            message: `Real test email sent to ziauldin371@gmail.com! (Gmail ID: ${data.result?.gmailMessageId || 'Confirmed'}, Labels: ${JSON.stringify(data.result?.labels || ['SENT'])})`,
+            success: true,
+          });
+          setEmailStatus((prev) => ({
+            ...prev,
+            testConfirmed: true,
+            testConfirmedAt: new Date().toISOString(),
+          }));
+        } else {
+          setTestResult({
+            name: conn.name,
+            message: `Test email failed: ${data.error || 'Unknown error'}`,
+            success: false,
+          });
+        }
+      } catch (err: unknown) {
+        setTestingKey(null);
+        setTestResult({
+          name: conn.name,
+          message: `Network error sending test email: ${err instanceof Error ? err.message : 'Unknown'}`,
+          success: false,
+        });
+      }
+      return;
+    }
+
     setTimeout(() => {
       setTestingKey(null);
       if (conn.name === 'Supabase PostgreSQL') {
