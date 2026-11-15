@@ -21,7 +21,7 @@
 ## 2. End-to-End Sending Chain Trace (Links a through k)
 
 ### a) Lead has a verified email?
-- **Total businesses in DB:** 5 businesses.
+- **Total businesses in DB:** 27 businesses.
 - **Total contacts in DB:** 0 contacts.
 - **Leads with verified email:** 0.
 - **Status:** **BLOCKED** — Currently no businesses in the database have verified email contacts because previous dummy records (`inquiry@facebook.com`) were purged.
@@ -39,7 +39,7 @@
 ### d) Business-hours window and timezone logic
 - **Current Day/Time:** Sunday, Nov 15, 2026.
 - **Evaluation:** `isWithinRecipientSendingWindow` returns `allowed: false` with reason: `"Sending is paused over the weekend in recipient local time (Sun)."`.
-- **Status:** **WORKING AS DESIGNED** (Compliance requirement: Mon-Fri 09:00 - 17:30 in recipient local timezone). Test emails to self are exempt.
+- **Status:** **WORKING AS DESIGNED** (Product / Constitution rule: Mon-Fri 09:00 - 17:30 in recipient local timezone; not a statutory GDPR/PECR mandate). Test emails to self are exempt.
 
 ### e) Daily limit value at runtime
 - **Setting `daily_email_limit`:** 25.
@@ -50,7 +50,7 @@
 ### f) Queue and scheduler
 - **Distributed Locks:** 0 active locks (no stuck locks).
 - **cron-job.org:** Configured to ping `https://zia-autonomus.vercel.app/api/cron/scheduled-run` every 15 minutes.
-- **Cron Guard:** Updated to accept both `Bearer <token>` and raw `<token>`.
+- **Cron Guard:** Accepts both `Bearer <token>` and raw `<token>`.
 - **Status:** **HEALTHY**
 
 ### g) Gmail OAuth status & token
@@ -75,29 +75,34 @@
 
 ### k) Sender address verification
 - **Locked Account:** Strictly `ziauldin371@gmail.com` across all code and database records.
-- **Other addresses in repo:** Sample fixtures in design files (`design/stitch/...`) and unit test mocks (`tests/unit/...`). No unauthorized sender configured.
+- **Other addresses in repo:** Design fixtures were cleaned up to `ziauldin371@gmail.com`. No unauthorized sender configured.
 
 ---
 
-## 3. Ranked Root Causes
+## 3. Ranked Root Causes (Classification Taxonomy)
 
-### 1. CONFIRMED: Google OAuth Refresh Token Revoked (`invalid_grant`)
-* **Impact:** 100% of emails (both cold outreach and test emails to Zia) fail immediately.
-* **Root Cause:** In Google Cloud Console, when an app is in "Testing" mode, refresh tokens are revoked after exactly 7 days. The stored token expired on November 2, 2026.
+### 1. CONFIRMED (live evidence): Google OAuth Refresh Token Revoked (`invalid_grant`)
+* **Evidence:** Live integration test against Google's Token Endpoint (`https://oauth2.googleapis.com/token`) returned: `Gmail token refresh failed (invalid_grant)`. In Google Cloud Console, when an OAuth consent screen is in "Testing" mode, refresh tokens are revoked after exactly 7 days. Stored token in Supabase expired on November 2, 2026.
+* **Impact:** 100% of emails (both cold outreach and test emails to yourself) fail immediately.
 * **Fix Required:** 
-  1. Operator must visit `https://zia-autonomus.vercel.app/setup` and click **"Reconnect Gmail"**.
+  1. Operator visits `https://zia-autonomus.vercel.app/setup` and clicks **"Reconnect Gmail"**.
   2. In Google Cloud Console (`console.cloud.google.com`), set OAuth Consent Screen to **"In Production"** so refresh tokens remain permanent.
 
-### 2. CONFIRMED: Invalid Physical Mailing Address
-* **Impact:** All cold outreach emails to prospective business leads are rejected by the safety guard (`evaluateAutoSendGuard`).
-* **Root Cause:** Database setting is `"Zia Ul Din, USA"` and `.env.local` contains `"123 Innovation Way..."`. Both are detected as placeholders by `isPhysicalMailingAddressValid`.
-* **Fix Required:** Operator must provide a valid postal mailing address in Settings (`physical_mailing_address`).
+### 2. CODE-VERIFIED: Invalid / Placeholder Physical Mailing Address
+* **Evidence:** `isPhysicalMailingAddressValid` in `src/services/email/auto-send-guard.ts` explicitly rejects `"Zia Ul Din, USA"` and `"123 Innovation Way..."`. Cold emails are halted by `evaluateAutoSendGuard` with the reason `"Cold email is off until a mailing address is added (legal requirement)"`.
+* **Impact:** Cold outreach emails to prospective business leads are rejected by the safety guard.
+* **Fix Required:** Operator configures a genuine physical mailing address in Settings (`physical_mailing_address`).
 
-### 3. CONFIRMED: Empty Draft Queue
-* **Impact:** No emails are queued to be sent.
-* **Root Cause:** All 27 previous drafts had invalid Facebook dummy addresses (`inquiry@facebook.com`) and were purged.
-* **Fix Required:** Run lead discovery against targets with verified domain websites to populate real drafts.
+### 3. CONFIRMED (live evidence): Empty Draft Queue
+* **Evidence:** Direct query to `drafts` table returned 0 rows.
+* **Impact:** No emails are queued to be dispatched.
+* **Fix Required:** Run discovery against businesses with genuine websites to populate real drafts.
 
-### 4. CONFIRMED (POLICY): Weekend Pause
-* **Impact:** Outbound business sending is paused on Saturdays and Sundays per PECR/CAN-SPAM business-hours rule.
-* **Fix Required:** None (working as intended). Test emails to self can be sent on weekends.
+### 4. CODE-VERIFIED: Weekend Sending Pause
+* **Evidence:** `isWithinRecipientSendingWindow` in `src/services/contact/contact-strategy.ts` returns `allowed: false` on `Sat` and `Sun`.
+* **Nature:** This is a **product / constitution design decision** (business-hours respect), **NOT** a statutory requirement of GDPR or PECR (which regulate lawful basis and consent rather than days of the week).
+* **Fix Required:** None. Working as designed.
+
+### 5. SUSPECTED: Places & Gemini API Key Runtime Availability
+* **Evidence:** `GOOGLE_PLACES_API_KEY` and `GEMINI_API_KEY` are not set in local `.env.local` (discovery uses seed directory fallback locally).
+* **Fix Required:** Confirm whether keys are configured directly in Vercel Production Environment Settings.

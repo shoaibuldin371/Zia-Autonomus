@@ -17,3 +17,4 @@ This document records architectural, security, and operational decisions made du
 ## Decision 004: Diagnosing Email Dispatch Failures (Stage R0)
 - **Date**: 2026-11-15
 - **Decision**: Execute a comprehensive trace of all 11 stages of the email sending pipeline (Lead verification, draft rules, send guard rules, business hours/timezone calculation, daily limits, cron/scheduler status, Google OAuth tokens, environment variables, Gmail API calls, Supabase database schema, and sender address verification).
+

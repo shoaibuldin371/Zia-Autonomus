@@ -42,3 +42,4 @@ Never use dishonest marketing wording:
 
 ## 10. Audit Log & Decisions
 Any deviation, trade-off, or architectural choice must be documented in `docs/DECISIONS.md` with rationale.
+
