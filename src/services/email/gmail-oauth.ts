@@ -86,15 +86,11 @@ export async function handleGoogleOAuthCallback(
   }
 
   // 3. Encrypt sensitive tokens with AES-256-GCM before database storage
+  // Each token retains its own IV and auth tag in standard 'iv:tag:ciphertext' format
   const encryptedRefreshToken = refreshToken ? encrypt(refreshToken) : null;
   const encryptedAccessToken = encrypt(accessToken);
 
-  const [accessIv, accessTag, accessCipher] = encryptedAccessToken.split(':');
-  let refreshCipher = '';
-  if (encryptedRefreshToken) {
-    const rParts = encryptedRefreshToken.split(':');
-    refreshCipher = rParts[2] || encryptedRefreshToken;
-  }
+  const [accessIv, accessTag] = encryptedAccessToken.split(':');
 
   // Store in Supabase oauth_tokens table
   const supabase = getSupabaseServerClient();
@@ -110,23 +106,23 @@ export async function handleGoogleOAuthCallback(
   if (existingToken?.id) {
     const updatePayload: Record<string, unknown> = {
       user_email: GMAIL_LOCKED_ACCOUNT,
-      encrypted_access_token: accessCipher,
+      encrypted_access_token: encryptedAccessToken,
       iv: accessIv,
       auth_tag: accessTag,
       expires_at: expiresAt,
       status: 'active',
       updated_at: new Date().toISOString(),
     };
-    if (refreshCipher) {
-      updatePayload.encrypted_refresh_token = refreshCipher;
+    if (encryptedRefreshToken) {
+      updatePayload.encrypted_refresh_token = encryptedRefreshToken;
     }
     await supabase.from('oauth_tokens').update(updatePayload).eq('id', existingToken.id);
   } else {
     await supabase.from('oauth_tokens').insert({
       user_email: GMAIL_LOCKED_ACCOUNT,
       provider: 'gmail',
-      encrypted_access_token: accessCipher,
-      encrypted_refresh_token: refreshCipher || null,
+      encrypted_access_token: encryptedAccessToken,
+      encrypted_refresh_token: encryptedRefreshToken,
       iv: accessIv,
       auth_tag: accessTag,
       expires_at: expiresAt,
@@ -206,11 +202,11 @@ export async function getValidGmailAccessToken(): Promise<string> {
 
   const refreshed = await res.json();
   const newAccessTokenEncrypted = encrypt(refreshed.access_token);
-  const [newIv, newTag, newCipher] = newAccessTokenEncrypted.split(':');
+  const [newIv, newTag] = newAccessTokenEncrypted.split(':');
   const newExpiresAt = new Date(Date.now() + (refreshed.expires_in || 3600) * 1000).toISOString();
 
   await supabase.from('oauth_tokens').update({
-    encrypted_access_token: newCipher,
+    encrypted_access_token: newAccessTokenEncrypted,
     iv: newIv,
     auth_tag: newTag,
     expires_at: newExpiresAt,
